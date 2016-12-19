@@ -6,7 +6,7 @@ use Module::Metadata;
 
 WriteMakefile(
     NAME             => 'Moonshine::Element',
-    AUTHOR           => q{lnation <thisusedtobeanemail@gmail.com>},
+    AUTHOR           => q{Robert Acock <thisusedtobeanemail@gmail.com>},
     VERSION_FROM     => 'lib/Moonshine/Element.pm',
     ABSTRACT_FROM    => 'lib/Moonshine/Element.pm',
     LICENSE          => 'artistic_2',
