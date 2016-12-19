@@ -6,6 +6,8 @@ Moonshine::Element
 
 Version 0.1 
 
+# DESCRIPTION
+
 # SYNOPSIS
 
     use Moonshine::Element;
@@ -71,6 +73,8 @@ List containing all valid attributes (could change per element)
 Unique Identifier 
 
 ## HTML ATTRIBUTES
+
+TODO actually apply some validation.
 
 ### accept
 
@@ -750,6 +754,11 @@ is pushed in the after\_element attribute.
 Render the Element as html.
 
     $base->render;
+
+All attributes set on an 'Element' will be rendered. There is currently no Attribute to Element
+validation.
+
+Html attributes can be HashRef's (keys sorted and values joined), ArrayRef's(joined), or just Scalars.
 
 # AUTHOR
 

@@ -13,47 +13,63 @@ BEGIN { @ISA = ('UNIVERSAL::Object') }
 our %HAS;
 
 BEGIN {
-    my @ATTRIBUTES = qw/accept accept_charset accesskey action align alt async autocomplete
-          autofocus autoplay autosave bgcolor border buffered challenge charset checked cite class
-          code codebase color cols colspan content contenteditable contextmenu controls coords datetime
-          default defer dir dirname disabled download draggable dropzone enctype for form formaction
-          headers height hidden high href hreflang http_equiv icon id integrity ismap itemprop keytype
-          kind label lang language list loop low manifest max maxlength media method min multiple muted
-          name novalidate open optimum pattern ping placeholder poster preload radiogroup readonly rel
-          required reversed rows rowspan sandbox scope scoped seamless selected shape size sizes span
-          spellcheck src srcdoc srclang srcset start step style summary tabindex target title type usemap
-          value width wrap/;
+    my @ATTRIBUTES =
+      qw/accept accept_charset accesskey action align alt async autocomplete
+      autofocus autoplay autosave bgcolor border buffered challenge charset checked cite class
+      code codebase color cols colspan content contenteditable contextmenu controls coords datetime
+      default defer dir dirname disabled download draggable dropzone enctype for form formaction
+      headers height hidden high href hreflang http_equiv icon id integrity ismap itemprop keytype
+      kind label lang language list loop low manifest max maxlength media method min multiple muted
+      name novalidate open optimum pattern ping placeholder poster preload radiogroup readonly rel
+      required reversed rows rowspan sandbox scope scoped seamless selected shape size sizes span
+      spellcheck src srcdoc srclang srcset start step style summary tabindex target title type usemap
+      value width wrap/;
 
     %HAS = (
-        ( map { $_ => sub { undef } } @ATTRIBUTES, qw/parent/ ),
-        ( map { $_ => sub { [] } } qw/data children after_element before_element/ ),
+        (
+            map {
+                $_ => sub { undef }
+              } @ATTRIBUTES,
+            qw/parent/
+        ),
+        (
+            map {
+                $_ => sub { [] }
+            } qw/data children after_element before_element/
+        ),
         tag            => sub { die "$_ is required" },
         attribute_list => sub { \@ATTRIBUTES },
         guid           => sub { Data::GUID->new->as_string },
-    );                                         
+    );
 
-    for my $a ( @ATTRIBUTES, qw/data tag attribute_list children after_element before_element guid parent/ ) {
+    for my $attr ( @ATTRIBUTES,
+        qw/data tag attribute_list children after_element before_element guid parent/
+      )
+    {
         no strict 'refs';
         {
-            *{"has_$a"} = sub {
-                my $val = $_[0]->{$a};
+            *{"has_$attr"} = sub {
+                my $val = $_[0]->{$attr};
                 defined $val or return undef;
                 is_arrayref($val) and return scalar @{$val};
-                is_hashref($val)  and return keys %{$val};
+                is_hashref($val) and return map { $_; }
+                  sort { $a <=> $b or $a cmp $b }
+                  keys %{$val};
                 return 1;
               }
         };
         {
-            *{"clear_$a"} = sub { undef $_[0]->{$a} }
+            *{"clear_$attr"} = sub { undef $_[0]->{$attr} }
         };
         {
-            *{"$a"} = sub {
-                my $val = $_[0]->{$a};
+            *{"$attr"} = sub {
+                my $val = $_[0]->{$attr};
                 defined $_[1] or return $val;
                 is_arrayref($val) && not is_arrayref( $_[1] )
                   and return push @{$val}, $_[1];
-                is_hashref($val) && is_hashref($_[1])
-                  and return map { $_[0]->{$a}->{$_} = $_[1]->{$_} } keys %{$_[1]};
+                is_hashref($val) && is_hashref( $_[1] )
+                  and return
+                  map { $_[0]->{$attr}->{$_} = $_[1]->{$_} } keys %{ $_[1] };
                 $_[0]->{$a} = $_[1] and return;
               }
         };
@@ -103,10 +119,17 @@ sub render {
         if ( $_[0]->$has_action ) {
             given ( ref $_[0]->{$attribute} ) {
                 when (/HASH/) {
-
+                    my $value = '';
+                    map {
+                        $value and $value .= ' ';
+                        $value .= $_[0]->{$attribute}->{$_};
+                    } $_[0]->$has_action;
+                    $html_attributes .= sprintf '%s="%s" ',
+                      $html_attribute, $value;
                 }
                 when (/ARRAY/) {
-
+                    $html_attributes .= sprintf '%s="%s" ',
+                      $html_attribute, ( join ' ', @{ $_[0]->{$attribute} } );
                 }
                 default {
                     $html_attributes .= sprintf '%s="%s" ',
@@ -166,6 +189,8 @@ Moonshine::Element
 =head1 VERSION
 
 Version 0.1 
+
+=head1 DESCRIPTION
 
 =head1 SYNOPSIS
 
@@ -233,6 +258,8 @@ List containing all valid attributes (could change per element)
 Unique Identifier 
 
 =head2 HTML ATTRIBUTES
+
+TODO actually apply some validation.
 
 =head3 accept
 
@@ -912,6 +939,11 @@ is pushed in the after_element attribute.
 Render the Element as html.
 
     $base->render;
+
+All attributes set on an 'Element' will be rendered. There is currently no Attribute to Element
+validation.
+
+Html attributes can be HashRef's (keys sorted and values joined), ArrayRef's(joined), or just Scalars.
 
 =head1 AUTHOR
 

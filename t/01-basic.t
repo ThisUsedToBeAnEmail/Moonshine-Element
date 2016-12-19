@@ -108,6 +108,25 @@ $div_render = $new_div->render;
 is($div_render,
     '<div class="one"></div><div class="two"></div><div class="three"></div>', "divs rendered - $div_render");
 
+my $array_div = Moonshine::Element->new( tag => 'div', class => [ 'one', 'two', 'three' ] );
+
+$div_render = $array_div->render;
+
+is($div_render, '<div class="one two three"></div>', "okay one two three");
+
+my $hash_div = Moonshine::Element->new( 
+    tag => 'div', 
+    class => { 
+        1 => 'for', 
+        2 => 'special',
+        3 => 'people', 
+    }
+);
+
+$div_render = $hash_div->render;
+
+is($div_render, '<div class="for special people"></div>', "okay sort the hash and join the values");
+
 done_testing();
                                                             
 1;

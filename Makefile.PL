@@ -18,8 +18,9 @@ WriteMakefile(
         'Test::More' => 0,
     },
     PREREQ_PM => {
-        #'ABC'              => 1.6,
-        #'Foo::Bar::Module' => 5.0401,
+        'UNIVERSAL::Object' => '0.1',
+        'Ref::Util' => '0.101',
+        'Data::GUID' => '0.048',
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Moonshine-Element-*' },
