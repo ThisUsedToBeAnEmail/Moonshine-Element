@@ -62,7 +62,8 @@ sub run_test_ok {
         my $action = $instruction->{action};
         my $expected = $instruction->{expected};
 
-        $action or die 'cry where is my action';
+        $action && $expected or diag explain $instruction and
+            die 'I just burnt a hole in my home computer';
 
         my $test = defined $instruction->{args} 
             ? $class->$action($instruction->{args}) 
