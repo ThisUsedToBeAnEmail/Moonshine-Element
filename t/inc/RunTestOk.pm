@@ -1,0 +1,99 @@
+package RunTestOk;
+
+use warnings;
+use strict;
+
+use Test::More;
+
+use base 'Test::Builder::Module';
+
+use Exporter 'import';
+
+use feature qw/switch/;
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
+use Scalar::Util qw/reftype blessed/;
+
+our @EXPORT = qw/ run_test_ok  /;
+
+our %EXPORT_TAGS = ( all => [qw/run_test_ok/] );
+
+my $tb = __PACKAGE__->builder;
+
+=head1 run_test_ok
+    
+    my $args = {
+        build => {
+             class => 'Moonshine::Element', 
+             args => {
+                tag => 'p',
+                text => 'hello'
+             }
+        }
+        instructions => [
+           { 
+                action => 'render'
+                args => {
+
+                } 
+                expected => '<p>hello</p>'
+           },
+           {
+               action => 'text',
+               expected => 'hello',
+           },
+        ],
+    }
+
+=cut
+
+sub run_test_ok {
+    my $args = shift;
+
+    diag explain $args;
+
+    my $instructions = $args->{instructions};
+    
+    my $class;
+    unless ( $class = $args->{class} ) {
+        my $build = $args->{build};
+        $class = $build->{class}->new($build->{args} // {});
+    }
+
+    for my $instruction (@{ $instructions }) {
+        diag explain $instruction;
+
+        my $action = $instruction->{action};
+        my $expected = $instruction->{expected};
+
+        $action or die 'cry where is my action';
+
+        my $test = defined $instruction->{args} 
+            ? $class->$action($instruction->{args}) 
+            : $class->$action;
+        
+        if (my $blessed = blessed $test) {
+            $tb->is_eq($blessed, $expected, "Test Blessed : $expected");
+            
+            if (my $subtests = $instruction->{sub_tests}){
+                my $new_args = {
+                    class => $test,
+                    instructions => $subtests,
+                };
+                run_test_ok($new_args);
+            }
+        } else {
+           given ( reftype \$test ) {
+                when (/REF/) {
+                    $tb->is_deeply($test, $expected);
+                    diag explain $test;
+                }
+                when (/SCALAR/) {
+                    $tb->is_eq($test, $expected);
+                }
+                default {
+                    diag explain $test;
+                }
+            }
+        }
+    }
+}
