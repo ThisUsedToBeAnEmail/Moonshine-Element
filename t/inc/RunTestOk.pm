@@ -49,8 +49,6 @@ my $tb = __PACKAGE__->builder;
 sub run_test_ok {
     my $args = shift;
 
-    diag explain $args;
-
     my $instructions = $args->{instructions};
     
     my $class;
@@ -60,7 +58,6 @@ sub run_test_ok {
     }
 
     for my $instruction (@{ $instructions }) {
-        diag explain $instruction;
 
         my $action = $instruction->{action};
         my $expected = $instruction->{expected};
@@ -72,26 +69,28 @@ sub run_test_ok {
             : $class->$action;
         
         if (my $blessed = blessed $test) {
-            $tb->is_eq($blessed, $expected, "Test Blessed : $expected");
+            $tb->is_eq($blessed, $expected, "$action returns Blessed - $expected");
             
             if (my $subtests = $instruction->{sub_tests}){
+                diag 'Build new args for sub_tests';
                 my $new_args = {
                     class => $test,
                     instructions => $subtests,
                 };
                 run_test_ok($new_args);
+                diag 'Return to reality';
             }
         } else {
            given ( reftype \$test ) {
                 when (/REF/) {
-                    $tb->is_deeply($test, $expected);
+                    $tb->is_deeply($test, $expected, "$action IS DEEPLY - ");
                     diag explain $test;
                 }
                 when (/SCALAR/) {
-                    $tb->is_eq($test, $expected);
+                    $tb->is_eq($test, $expected, "$action IS SCALAR - $expected" );
                 }
                 default {
-                    diag explain $test;
+                  die diag explain $test;
                 }
             }
         }
