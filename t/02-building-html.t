@@ -101,7 +101,7 @@ subtest 'testing de basics' => sub {
 
 subtest 'object' => sub {
     ok(1);
-    my $child = Moonshine::Element->new( tag => 'p', data => ['test'] );
+    my $child = Moonshine::Element->new({ tag => 'p', data => ['test'] });
     run_test_ok({
         build => {
             class => 'Moonshine::Element',
@@ -114,20 +114,22 @@ subtest 'object' => sub {
                 action => 'add_child',
                 args => $child,
                 expected => 'Moonshine::Element',
-            },
-            {
-                action => 'add_after_element',
-                args => $child,
-                expected => 'Moonshine::Element',
-            },
-            {
-                action => 'add_before_element',
-                args => $child,
-                expected => 'Moonshine::Element',
+                sub_tests => [
+                    {
+                        action => 'add_after_element',
+                        args => $child,
+                        expected => 'Moonshine::Element',
+                    },
+                    {
+                        action => 'add_before_element',
+                        args => $child,
+                        expected => 'Moonshine::Element',
+                    }
+                ]
             },
             {
                 action => 'render',
-                excpected => '<div><p>test</p></p>test</p><p>test</p></div>'
+                expected => '<div><p>test</p><p>test</p><p>test</p></div>'
             }
         ],
     });
