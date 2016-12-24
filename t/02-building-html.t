@@ -2,9 +2,9 @@
 
 use Test::More;
 
-use lib 't/inc';
+use lib 't/testing';
 
-use RunTestOk qw/:all/;
+use Dreams qw/:all/;
 
 BEGIN {
     use_ok('Moonshine::Element');
@@ -12,7 +12,7 @@ BEGIN {
 
 subtest 'testing de basics' => sub {
     ok(1);
-    run_test_ok({
+    moon_test({
         build => {
             class => 'Moonshine::Element',
             args => {
@@ -102,7 +102,7 @@ subtest 'testing de basics' => sub {
 subtest 'object' => sub {
     ok(1);
     my $child = Moonshine::Element->new({ tag => 'p', data => ['test'] });
-    run_test_ok({
+    moon_test({
         build => {
             class => 'Moonshine::Element',
             args => {
@@ -137,7 +137,7 @@ subtest 'object' => sub {
 
 subtest 'basic_html_page' => sub {
     ok(1);
-    run_test_ok({
+    moon_test({
         build => {
             class => 'Moonshine::Element',
             args => {

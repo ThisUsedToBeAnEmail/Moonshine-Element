@@ -1,4 +1,4 @@
-package RunTestOk;
+package Dreams;
 
 use warnings;
 use strict;
@@ -13,13 +13,13 @@ use feature qw/switch/;
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 use Scalar::Util qw/reftype blessed/;
 
-our @EXPORT = qw/ run_test_ok  /;
+our @EXPORT = qw/ moon_test /;
 
-our %EXPORT_TAGS = ( all => [qw/run_test_ok/] );
+our %EXPORT_TAGS = ( all => [qw/moon_test/] );
 
 my $tb = __PACKAGE__->builder;
 
-=head1 run_test_ok
+=head1 moon_test
     
     my $args = {
         build => {
@@ -46,7 +46,7 @@ my $tb = __PACKAGE__->builder;
 
 =cut
 
-sub run_test_ok {
+sub moon_test {
     my $args = shift;
 
     my $instructions = $args->{instructions};
@@ -78,7 +78,7 @@ sub run_test_ok {
                     class => $test,
                     instructions => $subtests,
                 };
-                run_test_ok($new_args);
+                moon_test($new_args);
                 diag 'Return to reality';
             }
         } else {

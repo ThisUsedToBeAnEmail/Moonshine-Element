@@ -17,6 +17,7 @@ WriteMakefile(
     },
     BUILD_REQUIRES => {
         'Test::More' => 0,
+        'Test::Simple' => '1.302073', 
     },
     PREREQ_PM => {
         'UNIVERSAL::Object' => '0.1',
