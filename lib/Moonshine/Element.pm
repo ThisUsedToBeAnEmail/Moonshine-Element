@@ -83,8 +83,9 @@ sub build_element {
     my ( $self, $build_args, $parent ) = @_;
     
     $build_args->{parent} = $parent // $self;
-    is_blessed_ref($build_args) and $build_args->isa('Moonshine::Element') and
-        return $build_args;
+    if (is_blessed_ref($build_args)){ 
+        $build_args->isa('Moonshine::Element') and return $build_args or die "I'm not a Moonshine::Element";
+    } 
 
     return $self->new($build_args);
 }
