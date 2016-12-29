@@ -20,7 +20,7 @@ WriteMakefile(
         'Test::Simple' => '1.302073', 
     },
     PREREQ_PM => {
-        'UNIVERSAL::Object' => '0.1',
+        'UNIVERSAL::Object' => '0.04',
         'Ref::Util' => '0.101',
         'Data::GUID' => '0.048',
     },

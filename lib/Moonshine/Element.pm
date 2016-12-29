@@ -6,7 +6,7 @@ use Ref::Util qw/:all/;
 use UNIVERSAL::Object;
 use Data::GUID;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use feature qw/switch/;
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
@@ -33,12 +33,12 @@ BEGIN {
             map {
                 $_ => sub { undef }
               } @ATTRIBUTES,
-            qw/parent/
+            qw/parent data/
         ),
         (
             map {
                 $_ => sub { [] }
-            } qw/data children after_element before_element/
+            } qw/children after_element before_element/
         ),
         tag            => sub { die "$_ is required" },
         attribute_list => sub { \@ATTRIBUTES },
@@ -81,11 +81,12 @@ BEGIN {
 
 sub build_element {
     my ( $self, $build_args, $parent ) = @_;
-    
+
     $build_args->{parent} = $parent // $self;
-    if (is_blessed_ref($build_args)){ 
-        $build_args->isa('Moonshine::Element') and return $build_args or die "I'm not a Moonshine::Element";
-    } 
+    if ( is_blessed_ref($build_args) ) {
+        $build_args->isa('Moonshine::Element') and return $build_args
+          or die "I'm not a Moonshine::Element";
+    }
 
     return $self->new($build_args);
 }
@@ -124,25 +125,9 @@ sub render {
         $html_attribute =~ s/_/-/;
         my $has_action = sprintf 'has_%s', $attribute;
         if ( $_[0]->$has_action ) {
-            given ( ref $_[0]->{$attribute} ) {
-                when (/HASH/) {
-                    my $value = '';
-                    map {
-                        $value and $value .= ' ';
-                        $value .= $_[0]->{$attribute}->{$_};
-                    } $_[0]->$has_action;
-                    $html_attributes .= sprintf '%s="%s" ',
-                      $html_attribute, $value;
-                }
-                when (/ARRAY/) {
-                    $html_attributes .= sprintf '%s="%s" ',
-                      $html_attribute, ( join ' ', @{ $_[0]->{$attribute} } );
-                }
-                default {
-                    $html_attributes .= sprintf '%s="%s" ',
-                      $html_attribute, $_[0]->{$attribute};
-                }
-            }
+            $html_attributes .= sprintf( '%s="%s" ',
+                $html_attribute,
+                $_[0]->_attribute_value( $attribute, $has_action ) );
         }
     }
 
@@ -163,7 +148,11 @@ sub render {
         }
     }
 
-    return $_[0]->tidy_html($html);
+    return $_[0]->_tidy_html($html);
+}
+
+sub text {
+    return $_[0]->has_data ? $_[0]->_attribute_value('data') : '';
 }
 
 sub _render_element {
@@ -176,11 +165,29 @@ sub _render_element {
     $element .= $_[0]->text and return $element;
 }
 
-sub text {
-    return $_[0]->has_data ? join ' ', @{ $_[0]->{data} } : '';
+sub _attribute_value {
+    my ( $self, $attribute, $has_action ) = @_;
+
+    $has_action //= sprintf( 'has_%s', $attribute );
+    given ( ref $_[0]->{$attribute} ) {
+        when (/HASH/) {
+            my $value = '';
+            map {
+                $value and $value .= ' ';
+                $value .= $_[0]->{$attribute}->{$_};
+            } $_[0]->$has_action;
+            return $value;
+        }
+        when (/ARRAY/) {
+            return join ' ', @{ $_[0]->{$attribute} };
+        }
+        default {
+            return $_[0]->{$attribute};
+        }
+    }
 }
 
-sub tidy_html {
+sub _tidy_html {
     $_[1] =~ s/\s+>/>/g;
     return $_[1];
 }
@@ -195,7 +202,7 @@ Moonshine::Element - Build some more html.
 
 =head1 VERSION
 
-Version 0.03 
+Version 0.04 
 
 =head1 DESCRIPTION
 
