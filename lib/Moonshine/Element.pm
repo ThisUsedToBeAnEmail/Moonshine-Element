@@ -6,7 +6,7 @@ use Ref::Util qw/:all/;
 use UNIVERSAL::Object;
 use Data::GUID;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use feature qw/switch/;
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
@@ -26,7 +26,11 @@ BEGIN {
       name novalidate open optimum pattern ping placeholder poster preload radiogroup readonly rel
       required reversed rows rowspan sandbox scope scoped seamless selected shape size sizes span
       spellcheck src srcdoc srclang srcset start step style summary tabindex target title type usemap
-      value width wrap/;
+      value width wrap aria_autocomplete aria_atomic aria_busy aria_checked aria_controls
+      aria_disabled aria_dropeffect aria_flowto aria_grabbed aria_expanded aria_haspopup aria_hidden 
+      aria_invalid aria_label aria_labelledby aria_live aria_level aria_multiline aria_multiselectable 
+      aria_orientation aria_pressed aria_readonly aria_required aria_selected aria_sort aria_valuemax 
+      aria_valuemin aria_valuenow aria_valuetext aria_owns aria_relevant role data_toggle aria_describedby/;
 
     %HAS = (
         (
@@ -156,13 +160,13 @@ sub text {
 }
 
 sub _render_element {
-    my $element;
+    my $element = $_[0]->text;
     if ( $_[0]->has_children ) {
         for ( @{ $_[0]->children } ) {
             $element .= $_->render;
         }
     }
-    $element .= $_[0]->text and return $element;
+    return $element;
 }
 
 sub _attribute_value {
@@ -202,7 +206,7 @@ Moonshine::Element - Build some more html.
 
 =head1 VERSION
 
-Version 0.05 
+Version 0.06 
 
 =head1 DESCRIPTION
 
