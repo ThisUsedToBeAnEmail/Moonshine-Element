@@ -191,6 +191,16 @@ sub _attribute_value {
     }
 }
 
+sub set {
+    is_hashref($_[1]) or die "args passed to set must be a hashref";
+    
+    for my $attribute (keys %{$_[1]}) {
+        $_[0]->$attribute($_[1]->{$attribute});
+    } 
+
+    return $_[0];
+}
+
 sub _tidy_html {
     $_[1] =~ s/\s+>/>/g;
     return $_[1];
