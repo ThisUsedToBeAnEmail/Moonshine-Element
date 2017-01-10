@@ -30,7 +30,7 @@ BEGIN {
       aria_disabled aria_dropeffect aria_flowto aria_grabbed aria_expanded aria_haspopup aria_hidden 
       aria_invalid aria_label aria_labelledby aria_live aria_level aria_multiline aria_multiselectable 
       aria_orientation aria_pressed aria_readonly aria_required aria_selected aria_sort aria_valuemax 
-      aria_valuemin aria_valuenow aria_valuetext aria_owns aria_relevant role data_toggle aria_describedby/;
+      aria_valuemin aria_valuenow aria_valuetext aria_owns aria_relevant role data_toggle data_target aria_describedby/;
 
     %HAS = (
         (
