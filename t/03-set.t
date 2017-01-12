@@ -41,6 +41,56 @@ subtest 'object' => sub {
     });
 };
 
+subtest 'object' => sub {
+    ok(1);
+    moon_test({
+        build => {
+            class => 'Moonshine::Element',
+            args => {
+                tag => 'div',
+                data => '0',
+                aria_valuemin => '0',
+            }
+        },
+        instructions => [
+            {
+                action => 'render',
+                expected => '<div aria-valuemin="0">0</div>'
+            },
+        ],
+    });
+};
+
+subtest 'object' => sub {
+    ok(1);
+    moon_test({
+        build => {
+            class => 'Moonshine::Element',
+            args => {
+                tag => 'div',
+            }
+        },
+        instructions => [
+            {
+                action => 'render',
+                expected => '<div></div>'
+            },
+            {
+                action => 'set',
+                args => {
+                    data => '0',
+                    aria_valuemin => '0'   
+                },
+                expected => 'Moonshine::Element',
+            },
+            {
+                action => 'render',
+                expected => '<div aria-valuemin="0">0</div>'
+            },
+        ],
+    });
+};
+
 done_testing();
 
 1;
