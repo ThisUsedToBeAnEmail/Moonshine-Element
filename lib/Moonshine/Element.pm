@@ -184,14 +184,11 @@ sub _attribute_value {
         }
         when (/ARRAY/) {
             my $value = '';
-            map {
+            for(@{ $_[0]->{$attribute} }) {
                 $value and $value .= ' ';
-                $value .=
-                  is_blessed_ref($_)
-                  && $_->isa('Moonshine::Element')
-                  ? $_->render
-                  : $_;
-            } @{ $_[0]->{$attribute} };
+                is_scalarref(\$_) and $value .= $_ and next;
+                $value .= $self->build_element($_)->render and next;
+            }
             return $value;
         }
         default {

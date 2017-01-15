@@ -39,7 +39,7 @@ subtest 'object' => sub {
                 class => 'Moonshine::Element',
                 args  => {
                     tag  => 'div',
-                    data => [ 'hello', { tag => 'code', data => '&lt;section&gt' }, 'should be wrapped as inline' ],
+                    data => [ 'hello', { tag => 'code', data => '&lt;section&gt;' }, 'should be wrapped as inline' ],
                 }
             },
             instructions => [
