@@ -32,6 +32,27 @@ subtest 'object' => sub {
             ],
         }
     );
+
+    moon_test(
+        {
+            build => {
+                class => 'Moonshine::Element',
+                args  => {
+                    tag  => 'div',
+                    data => [ 'hello', { tag => 'code', data => '&lt;section&gt' }, 'should be wrapped as inline' ],
+                }
+            },
+            instructions => [
+                {
+                    action => 'render',
+                    expected =>
+'<div>hello <code>&lt;section&gt;</code> should be wrapped as inline</div>'
+                },
+            ],
+        }
+    );
+
+
 };
 
 done_testing();
