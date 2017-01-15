@@ -184,9 +184,9 @@ sub _attribute_value {
         }
         when (/ARRAY/) {
             my $value = '';
-            for(@{ $_[0]->{$attribute} }) {
+            for ( @{ $_[0]->{$attribute} } ) {
                 $value and $value .= ' ';
-                is_scalarref(\$_) and $value .= $_ and next;
+                is_scalarref( \$_ ) and $value .= $_ and next;
                 $value .= $self->build_element($_)->render and next;
             }
             return $value;
