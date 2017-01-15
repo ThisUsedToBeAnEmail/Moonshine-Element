@@ -12,22 +12,26 @@ BEGIN {
 
 subtest 'object' => sub {
     ok(1);
-    my $cite = Moonshine::Element->new({ tag => 'code', data => '&lt;section&gt;' }); 
-    moon_test({
-        build => {
-            class => 'Moonshine::Element',
-            args => {
-                tag => 'p',
-                data => [ 'hello', $cite, 'should be wrapped as inline' ],
-            }
-        },
-        instructions => [
-            {
-                action => 'render',
-                expected => '<div>hello <code>&lt;section&gt;</code> should be wrapped as inline</div>'
+    my $cite =
+      Moonshine::Element->new( { tag => 'code', data => '&lt;section&gt;' } );
+    moon_test(
+        {
+            build => {
+                class => 'Moonshine::Element',
+                args  => {
+                    tag  => 'div',
+                    data => [ 'hello', $cite, 'should be wrapped as inline' ],
+                }
             },
-        ],
-    });
+            instructions => [
+                {
+                    action => 'render',
+                    expected =>
+'<div>hello <code>&lt;section&gt;</code> should be wrapped as inline</div>'
+                },
+            ],
+        }
+    );
 };
 
 done_testing();

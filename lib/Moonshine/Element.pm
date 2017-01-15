@@ -27,9 +27,9 @@ BEGIN {
       required reversed rows rowspan sandbox scope scoped seamless selected shape size sizes span
       spellcheck src srcdoc srclang srcset start step style summary tabindex target title type usemap
       value width wrap aria_autocomplete aria_atomic aria_busy aria_checked aria_controls
-      aria_disabled aria_dropeffect aria_flowto aria_grabbed aria_expanded aria_haspopup aria_hidden 
-      aria_invalid aria_label aria_labelledby aria_live aria_level aria_multiline aria_multiselectable 
-      aria_orientation aria_pressed aria_readonly aria_required aria_selected aria_sort aria_valuemax 
+      aria_disabled aria_dropeffect aria_flowto aria_grabbed aria_expanded aria_haspopup aria_hidden
+      aria_invalid aria_label aria_labelledby aria_live aria_level aria_multiline aria_multiselectable
+      aria_orientation aria_pressed aria_readonly aria_required aria_selected aria_sort aria_valuemax
       aria_valuemin aria_valuenow aria_valuetext aria_owns aria_relevant role data_toggle data_target aria_describedby/;
 
     %HAS = (
@@ -183,7 +183,16 @@ sub _attribute_value {
             return $value;
         }
         when (/ARRAY/) {
-            return join ' ', @{ $_[0]->{$attribute} };
+            my $value = '';
+            map {
+                $value and $value .= ' ';
+                $value .=
+                  is_blessed_ref($_)
+                  && $_->isa('Moonshine::Element')
+                  ? $_->render
+                  : $_;
+            } @{ $_[0]->{$attribute} };
+            return $value;
         }
         default {
             return $_[0]->{$attribute};
@@ -192,11 +201,11 @@ sub _attribute_value {
 }
 
 sub set {
-    is_hashref($_[1]) or die "args passed to set must be a hashref";
-    
-    for my $attribute (keys %{$_[1]}) {
-        $_[0]->$attribute($_[1]->{$attribute});
-    } 
+    is_hashref( $_[1] ) or die "args passed to set must be a hashref";
+
+    for my $attribute ( keys %{ $_[1] } ) {
+        $_[0]->$attribute( $_[1]->{$attribute} );
+    }
 
     return $_[0];
 }
