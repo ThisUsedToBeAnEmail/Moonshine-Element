@@ -58,6 +58,7 @@ moon_test({
             expected => '<p class="two">one</p><p>hello</p>',
         },
         {
+            test => 'obj',
             func => 'add_after_element',
             args => {
                 tag => 'p',
@@ -113,8 +114,10 @@ moon_test({
     },
     instructions => [
         {
+            test => 'obj',
             func => 'add_child',
             args => $child1,
+            expected => 'Moonshine::Element',
             subtest => [
                 {
                     test => 'obj',
@@ -224,6 +227,6 @@ moon_test({
     ],
 });
 
-sunrise(32);
+sunrise(40);
 
 1;
