@@ -1,6 +1,5 @@
 #! perl
 use Moonshine::Test qw/:all/;
-use lib 't/testing';
 
 use Moonshine::Element;
 
