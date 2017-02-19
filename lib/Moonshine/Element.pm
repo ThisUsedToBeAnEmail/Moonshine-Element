@@ -31,7 +31,7 @@ BEGIN {
       aria_invalid aria_label aria_labelledby aria_live aria_level aria_multiline aria_multiselectable
       aria_orientation aria_pressed aria_readonly aria_required aria_selected aria_sort aria_valuemax
       aria_valuemin aria_valuenow aria_valuetext aria_owns aria_relevant role data_toggle data_target 
-      aria_describedby onkeydown onclick/;
+      aria_describedby onkeydown onclick onchange/;
 
     %HAS = (
         (
