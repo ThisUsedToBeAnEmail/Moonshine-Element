@@ -6,7 +6,7 @@ use Ref::Util qw/:all/;
 use UNIVERSAL::Object;
 use Data::GUID;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use feature qw/switch/;
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
@@ -223,7 +223,7 @@ Moonshine::Element - Build some more html.
 
 =head1 VERSION
 
-Version 0.06 
+Version 0.07 
 
 =head1 DESCRIPTION
 
