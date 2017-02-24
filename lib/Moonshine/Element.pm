@@ -2,19 +2,18 @@ package Moonshine::Element;
 
 use strict;
 use warnings;
-use Ref::Util qw/:all/;
+use Ref::Util qw/is_scalarref is_arrayref is_hashref is_blessed_ref/;
 use UNIVERSAL::Object;
 use Data::GUID;
 use Moonshine::Util qw/valid_attributes_for_tag/;
 use MOP::Class;
+
 our $VERSION = '0.07';
 
 use feature qw/switch/;
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
-our @ISA;
-BEGIN { @ISA = ('UNIVERSAL::Object') }
-our %HAS;
+our @ISA; BEGIN { @ISA = ('UNIVERSAL::Object') }
 
 BEGIN {
     my $class = MOP::Class->new(__PACKAGE__);
@@ -50,8 +49,7 @@ BEGIN {
                         is_arrayref($val) && not is_arrayref( $_[1] )
                           and return push @{$val}, $_[1];
                         is_hashref($val) && is_hashref( $_[1] )
-                          and return
-                          map { $_[0]->{$attr}->{$_} = $_[1]->{$_} }
+                          and return map { $_[0]->{$attr}->{$_} = $_[1]->{$_} }
                           keys %{ $_[1] };
                         $_[0]->{$attr} = $_[1] and return;
                     }
@@ -62,22 +60,14 @@ BEGIN {
 
     make_magic(
         {
-            (
-                map {
-                    $_ => sub { undef }
-                } qw/parent data/,
-            ),
-            (
-                map {
-                    $_ => sub { [] }
-                } qw/children after_element before_element/
-            ),
-            (
-                map {
-                    $_ => sub { die "$_ is required"; }
-                } qw/tag attribute_list/
-            ),
-            guid => sub { Data::GUID->new->as_string },
+            parent         => sub { undef },
+            data           => sub { undef },
+            children       => sub { [] },
+            after_element  => sub { [] },
+            before_element => sub { [] },
+            tag            => sub { die "$_ is required"; },
+            attribute_list => sub { die "$_ is required"; },
+            guid           => sub { Data::GUID->new->as_string },
         }
     );
 }
@@ -93,7 +83,7 @@ sub BUILDARGS {
 
     my %attributes = map {
         my $attr = s/-/_/g;
-        defined $build_args->{$_}
+        $build_args->{$_}
           ? ( $_ => sub { $build_args->{$_} } )
           : ( $_ => sub { undef } )
     } @{$attribute_list};
@@ -150,14 +140,14 @@ sub render {
         if ( $_[0]->$has_action ) {
             $html_attributes .= sprintf( '%s="%s" ',
                 $html_attribute,
-                $_[0]->_attribute_value( $attribute, $has_action ) );
+                $_[0]->_attribute_value( $attribute, $has_action ) 
+            );
         }
     }
 
     my $tag            = $_[0]->tag;
     my $render_element = $_[0]->_render_element;
-    my $html           = sprintf '<%s %s>%s</%s>', $tag, $html_attributes,
-      $render_element, $tag;
+    my $html           = sprintf '<%s %s>%s</%s>', $tag, $html_attributes, $render_element, $tag;
 
     if ( $_[0]->has_before_element ) {
         for ( @{ $_[0]->before_element } ) {
@@ -279,8 +269,7 @@ OUTPUT: <div><span></span><p></p><span></span></div>
 
     $base->clear_$attribute;
 
-=head2 Class Attributes
-    
+=head2 Attributes
 
 =head3 tag
 
@@ -304,648 +293,11 @@ Used when the element doesn't have a parent.
 
 =head3 attribute_list
 
-List containing all valid attributes (could change per element)
+List containing all valid attributes for the element
 
 =head3 guid
 
 Unique Identifier 
-
-=head2 HTML ATTRIBUTES
-
-TODO actually apply some validation.
-
-=head3 accept
-
-List of types the server accepts, typically a file type.
-
-Valid Elements: form, input
-
-=head3 accept_charset
-
-List of supportsed charsets
-
-Valid Elements: form
-
-=head3 accesskey
-
-Defines a keyboard shortcut to activate or add focus to the element
-
-Global
-
-=head3 action
-
-The URI of a program that processes the information submitted via the form
-
-Valid Elements: form
-
-=head3 align
-
-Specifies the horizontal alignment of the element
-
-Valid Elements: applet caption col colgroup hr iframe img table tbody td tfoot th thead tr
-
-=head3 alt
-
-Alternative text in case an image can't be displayed
-
-Valid Elements: applet area img input
-
-=head3 async
-
-Indicates that the script should be executed asynchronously
-
-Valid Elements: script
-
-=head3 autofocus
-
-The element should be automatically focused after the page is loaded
-
-Valid Elements: button input keygen select textarea
-
-=head3 autoplay
-
-The audio or video should play as soon as possible
-
-Valid Elements: audio video
-
-=head3 autosave
-
-Previous values should persist dropdowns of selectable values across page loads.
-
-Valid Elements: input
-
-=head3 bgcolor
-
-Background color of the element, Note: This is a legacy attribute. Please use CSS background-color.
-
-Valid Elements: body col colgroup marquee table tbody tfoot td th tr
-
-=head3 border
-
-The Border width. Note: This is a legacy attribute. Please use the CSS border property instead.
-
-Valid Elements: img object table
-
-=head3 buffered
-
-Contains the time range of already buggered media
-
-Valid Elements: audio video
-
-=head3 Challenge
-
-A challenge string that is submitted along with the public key
-
-Valid Elements: keygen
-
-=head3 charset
-
-Declares the character encoding of the page or script
-
-Valid Elements: meta script
-
-=head3 checked
-
-Indicates whether the element should be checked on page load
-
-Valid Elements: command input
-
-=head3 cite
-
-Contains a URI which points to the source of the quote or change
-
-Valid Elements: blockquote
-
-=head3 code
-
-Specifies the URL of the applet's class file to be loaded and executed
-
-Valid Elements: applet
-
-=head3 codebase
-
-This attribute gives the absolute or relative URL of the directory where 
-applets' .class files referenced by the code attribute are stored.
-
-Valid Elements: applet
-
-=head3 color
-
-This attribute sets the text color using either a named color or a color 
-specified in the hexadecimal #RRGGBB format. Note: This is a legacy attribute. 
-Please use the CSS color property instead.
-
-Valid Elements: basefont font hr
-
-=head3 cols
-
-Defines the number of columns in a textarea.
-
-Valid Elements: textarea
-
-=head3 colspan
-
-The colspan attribute defines the number of columns a cell should span.
- 
-Valid Elements: td, th
-
-=head3 content
-
-A value associated with http-equiv or name depending on the context.
-
-Valid Elements: meta
-
-=head3 contenteditable
-
-Indicates whether the element's content is editable."
-  
-Valid Elements: 'Global attribute'
-
-=head3 contextmenu
-
-Defines the ID of a &lt;menu&gt; element which will serve as the element's context menu.
-  
-Valid Elements: 'Global attribute'
-
-=head3 controls
-
-Indicates whether the browser should show playback controls to the user.
-  
-Valid Elements: audio, video
-
-=head3 coords
-
-A set of values specifying the coordinates of the hot-spot region.
-
-Valid Elements: area
-
-=head3 datetime
-
-Indicates the date and time associated with the element.
-  
-Valid Elements: del ins time
-
-=head3 default
-
-Indicates that the track should be enabled unless the user's preferences indicate something different.
-
-Valid Elements: track
-
-=head3 defer
-
-Indicates that the script should be executed after the page has been parsed.
-  
-Valid Elements: script
-
-=head3 dir
-
-Defines the text direction. Allowed values are ltr (Left-To-Right) or rtl (Right-To-Left)
-  
-Valid Elements: 'Global attribute'
-
-=head3 dirname
-  
-Valid Elements: input, textarea
-
-=head3 disabled
-
-Indicates whether the user can interact with the element.
-
-Valid Elements: button, command, fieldset, input, keygen, optgroup, option, select, textarea'
-
-=head3 download
-
-Indicates that the hyperlink is to be used for downloading a resource.
-
-Valid Elements: a, area
-
-=head3 draggable
-
-Defines whether the element can be dragged.
-
-Valid Elements: 'Global attribute'
-
-=head3 dropzone
-
-Indicates that the element accept the dropping of content on it.
-  
-Valid Elements: 'Global attribute'
-
-=head3 enctype
- 
-Defines the content type of the form date when the method is POST.
-  
-Valid Elements: form
-
-=head3 for
-
-Describes elements which belongs to this one.
-  
-Valid Elements: label, output
-
-=head3 form
-
-Indicates the form that is the owner of the element.
-  
-Valid Elements: button, fieldset, input, keygen, label, meter, object, output, progress, select, textarea'
-
-=head3 formaction
-
-Indicates the action of the element, overriding the action defined in the form'
-  
-Valid Elements: input, button
-
-=head3 headers
-
-IDs of the th elements which applies to this element.
-
-Valid Elements: td, th
-
-=head3 height
-
-Specifies the height of elements listed here. For all other elements, 
-use the CSS height property. Note: In some instances, such as div, 
-this is a legacy attribute, in which case the CSS height property 
-should be used instead.
-  
-Valid Elements: canvas, embed, iframe, img, input, object&gt, video
-
-=head3 hidden
-
-Prevents rendering of given element, while keeping child elements, e.g. script elements, active.
-
-Valid Elements: 'Global attribute'
-
-=head3 high
-
-Indicates the lower bound of the upper range.
-
-Valid Elements: meter
-
-=head3 href
-
-The URL of a linked resource.
-  
-Valid Elements: a, area, base, link
-
-=head3 hreflang
-
-Specifies the language of the linked resource.
-
-Valid Elements: a, area, link
-
-=head3 http-equiv
-  
-Valid Elements: meta
-
-=head3 icon
-
-Specifies a picture which represents the command.
-
-Valid Elements: command
-
-=head3 id
-
-Often used with CSS to style a specific element. The value of this attribute must be unique.
-
-Valid Elements: 'Global attribute'
-
-=head3 integrity
-
-Security Feature that allows browsers to verify what they fetch.A MDN Link
-  
-Valid Elements: link, script
-
-=head3 ismap
-
-Indicates that the image is part of a server-side image map.
-
-Valid Elements: img
-
-=head3 itemprop
-  
-Valid Elements: 'Global attribute'
-
-=head3 keytype
-
-Specifies the type of key generated.
-
-Valid Elements: 'keygen'
-
-=head3 kind
-
-Specifies the kind of text track.
-  
-Valid Elements: track
-
-=head3 label
-
-Specifies a user-readable title of the text track.
-  
-Valid Elements: track
-
-=head3 lang
-
-Defines the language used in the element.
-  
-Valid Elements: 'Global attribute'
-
-=head3 language
-
-Defines the script language used in the element.
-  
-Valid Elements: script
-
-=head3 list
-
-Identifies a list of pre-defined options to suggest to the user.
-  
-Valid Elements: input
-
-=head3 loop
-
-Indicates whether the media should start playing from the start when it's finished.
-  
-Valid Elements: audio, bgsound, marquee, video
-
-=head3 low
- 
-Indicates the upper bound of the lower range.
-
-Valid Elements: meter
-
-=head3 manifest
- 
-Specifies the URL of the document's cache manifest.
-  
-Valid Elements: html
-
-=head3 max
- 
-Indicates the maximum value allowed.
-
-Valid Elements: input, meter, progress
-
-=head3 maxlength
-
-Defines the maximum number of characters allowed in the element.
-
-Valid Elements: input, textarea
-
-=head3 media
-
-Specifies a hint of the media for which the linked resource was designed.
-  
-Valid Elements: a, area, link, source, style
-
-=head3 method
-
-Defines which HTTP method to use when submitting the form. Can be GET (default) or POST .
-
-Valid Elements: form
-
-=head3 min
-
-Indicates the minimum value allowed.
-
-Valid Elements: input, meter
-
-=head3 multiple
-
-Indicates whether multiple values can be entered in an input of the type email or file.
-
-Valid Elements: input, select
-
-=head3 muted
-
-Indicates whether the audio will be initially silenced on page load.
-
-Valid Elements: video
-
-=head3 name
- 
-Name of the element. For example used by the server to identify the fields in form submits.
-  
-Valid Elements: button, form, fieldset, iframe, input, keygen, 
-object, output, select, textarea, map, meta, param
-
-=head3 novalidate
-
-This attribute indicates that the form shouldn't be validated when submitted.
-  
-Valid Elements: form
-
-=head3 open
-
-Indicates whether the details will be shown on page load.
-
-Valid Elements: details
-
-=head3 optimum
- 
-Indicates the optimal numeric value.
-
-Valid Elements: meter
-
-=head3 pattern
-
-Defines a regular expression which the element's value will be validated against.
-
-Valid Elements: input
-
-=head3 ping
-  
-Valid Elements: a, area
-
-=head3 placeholder
-
-Provides a hint to the user of what can be entered in the field.
-
-Valid Elements: input, textarea
-
-=head3 poster
-
-A URL indicating a poster frame to show until the user plays or seeks.
-
-Valid Elements: video
-
-=head3 preload
-
-Indicates whether the whole resource, parts of it or nothing should be preloaded.
-
-Valid Elements: audio, video
-
-=head3 radiogroup
-  
-Valid Elements: command
-
-=head3 readonly
- 
-Indicates whether the element can be edited.
-
-Valid Elements: input, textarea
-
-=head3 rel
-
-Specifies the relationship of the target object to the link object.
-
-Valid Elements: a, area, link
-
-=head3 required
- 
-Indicates whether this element is required to fill out or not.
-
-Valid Elements: input, select, textarea
-
-=head3 reversed
-
-Indicates whether the list should be displayed in a descending order 
-instead of a ascending.
-
-Valid Elements: ol
-
-=head3 rows
-
-Defines the number of rows in a text area.
-
-Valid Elements: 'textarea'
-
-=head3 rowspan
-
-Defines the number of rows a table cell should span over.
-
-Valid  Elements: td, th
-
-=head3 sandbox
- 
-Valid Elements: iframe
-
-=head3 scope
-
-Valid Elements: th
-
-=head3 scoped
-  
-Valid Elements: style
-
-=head3 seamless
-  
-Valid Elements: iframe
-
-=head3 selected
- 
-Defines a value which will be selected on page load.
-
-Valid Elements: option
-
-=head3 shape
-  
-Valid Elements: a, area
-
-=head3 size
- 
-Defines the width of the element (in pixels). If the element's type 
-attribute is text or password then it's the number of characters.
-
-Valid Elements: input, select
-
-=head3 sizes
- 
-Valid Elements: link, img, source
-
-=head3 span
-  
-Valid Elements: col, colgroup
-
-=head3 spellcheck
-  
-Indicates whether spell checking is allowed for the element.
-
-Valid Elements: Global attribute
-
-=head3 src
- 
-The URL of the embeddable content.
-
-Valid Elements: audio, embed, iframe, img, input, script, source, track, video
-
-=head3 srcdoc
-  
-Valid Elements: iframe
-
-=head3 srclang
-  
-Valid Elements: track
-
-=head3 srcset
-  
-Valid Elements: img
-
-=head3 start
- 
-Defines the first number if other than 1.
-  
-Valid Elements: ol
-
-=head3 step
-
-Valid input
-
-=head3 style
-
-Defines CSS styles which will override styles previously set.
-
-Valid Elements: 'Global attribute'
-
-=head3 summary
-  
-Valid Elements: table
-
-=head3 tabindex
-
-Overrides the browser's default tab order and follows the one specified instead.
-
-Valid Elements: 'Global attribute'
-
-=head3 target
-  
-Valid Elements: a, area, base, form
-
-=head3 title
-
-Text to be displayed in a tooltip when hovering over the element.
-
-Valid Elements: 'Global attribute'
-
-=head3 type
- 
-Defines the type of the element.
-  
-Valid Elements: button, input, command, embed, object, script, source, style, menu
-
-=head3 usemap
-  
-Valid Elements: img, input, object
-
-=head3 value
-
-Defines a default value which will be displayed in the element on page load.
-  
-Valid Elements: button, option, input, li, meter, progress, param
-
-=head3 width
-
-For the elements listed here, this establishes the element's width. Note: For 
-all other instances, such as &lt;div&gt; , this is a legacy attribute, in which 
-case the CSS width a property should be used instead.
-  
-Valid Elements: canvas, embed, iframe, img, input, object, video'
-
-=head3 wrap
-
-Indicates whether the text should be wrapped.
-
-Valid Elements: textarea
 
 =head1 SUBROUTINES
 
