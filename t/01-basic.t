@@ -9,7 +9,7 @@ BEGIN {
     use_ok('Moonshine::Element');
 }
                                                        
-my $element = Moonshine::Element->new( tag => "table" );
+my $element = Moonshine::Element->new({ tag => "table" });
                 
 is($element->{tag}, 'table', "$element->{tag} as expected");
 
@@ -31,7 +31,7 @@ data_placement title/];
 is_deeply($element->{attribute_list}, $expected_attribute_list, "expected - $expected_attribute_list");
 =cut
 
-my $p_tag = Moonshine::Element->new( tag => "p", data => ['one', 'two', 'three']);
+my $p_tag = Moonshine::Element->new({ tag => "p", data => ['one', 'two', 'three'] });
 
 my $text = $p_tag->text;
 
@@ -41,7 +41,7 @@ my $render = $p_tag->render;
 
 is($render, "<p>one two three</p>", "p tag - $render");
 
-my $div_tag = Moonshine::Element->new( tag => "div", class => "content" );
+my $div_tag = Moonshine::Element->new({ tag => "div", class => "content" });
 
 my $div_render = $div_tag->render;
 
@@ -92,7 +92,7 @@ is($div_render,
  '<div class="content"><p class="first"></p><p class="second"></p><p class="p"></p><p class="threepointfour"></p><p class="fourth"></p><p class="fifth"></p></div>', 
     "div > p - p - p - $div_render");    
 
-my $new_div = Moonshine::Element->new( tag => 'div', class => 'two' );
+my $new_div = Moonshine::Element->new({ tag => 'div', class => 'two' });
 
 ok($new_div->add_before_element({ tag => 'div', class => 'one' }));
 
@@ -108,20 +108,20 @@ $div_render = $new_div->render;
 is($div_render,
     '<div class="one"></div><div class="two"></div><div class="three"></div>', "divs rendered - $div_render");
 
-my $array_div = Moonshine::Element->new( tag => 'div', class => [ 'one', 'two', 'three' ] );
+my $array_div = Moonshine::Element->new({ tag => 'div', class => [ 'one', 'two', 'three' ] });
 
 $div_render = $array_div->render;
 
 is($div_render, '<div class="one two three"></div>', "okay one two three");
 
-my $hash_div = Moonshine::Element->new( 
+my $hash_div = Moonshine::Element->new({ 
     tag => 'div', 
     class => { 
         1 => 'for', 
         2 => 'special',
         3 => 'people', 
     }
-);
+});
 
 $div_render = $hash_div->render;
 
