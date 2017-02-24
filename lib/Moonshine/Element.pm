@@ -62,11 +62,11 @@ BEGIN {
         {
             parent         => sub { undef },
             data           => sub { undef },
+            tag            => sub { undef },
+            attribute_list => sub { undef },
             children       => sub { [] },
             after_element  => sub { [] },
             before_element => sub { [] },
-            tag            => sub { die "$_ is required"; },
-            attribute_list => sub { die "$_ is required"; },
             guid           => sub { Data::GUID->new->as_string },
         }
     );
