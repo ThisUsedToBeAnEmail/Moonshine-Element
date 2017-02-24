@@ -8,7 +8,7 @@ use Data::GUID;
 use Moonshine::Util qw/valid_attributes_for_tag/;
 use MOP::Class;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 use feature qw/switch/;
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
@@ -231,7 +231,7 @@ Moonshine::Element - Build some more html.
 
 =head1 VERSION
 
-Version 0.07 
+Version 0.08 
 
 =head1 DESCRIPTION
 
@@ -269,7 +269,7 @@ OUTPUT: <div><span></span><p></p><span></span></div>
 
     $base->clear_$attribute;
 
-=head2 Attributes
+=head2 Default attribute's
 
 =head3 tag
 
