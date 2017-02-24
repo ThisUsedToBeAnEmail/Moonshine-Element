@@ -5,7 +5,8 @@ use warnings;
 use Ref::Util qw/:all/;
 use UNIVERSAL::Object;
 use Data::GUID;
-
+use Moonshine::Util qw/valid_attributes_for_tag/;
+use MOP::Class;
 our $VERSION = '0.07';
 
 use feature qw/switch/;
@@ -16,72 +17,89 @@ BEGIN { @ISA = ('UNIVERSAL::Object') }
 our %HAS;
 
 BEGIN {
-    my @ATTRIBUTES =
-      qw/accept accept_charset accesskey action align alt async autocomplete
-      autofocus autoplay autosave bgcolor border buffered challenge charset checked cite class
-      code codebase color cols colspan content contenteditable contextmenu controls coords datetime
-      default defer dir dirname disabled download draggable dropzone enctype for form formaction
-      headers height hidden high href hreflang http_equiv icon id integrity ismap itemprop keytype
-      kind label lang language list loop low manifest max maxlength media method min multiple muted
-      name novalidate open optimum pattern ping placeholder poster preload radiogroup readonly rel
-      required reversed rows rowspan sandbox scope scoped seamless selected shape size sizes span
-      spellcheck src srcdoc srclang srcset start step style summary tabindex target title type usemap
-      value width wrap aria_autocomplete aria_atomic aria_busy aria_checked aria_controls
-      aria_disabled aria_dropeffect aria_flowto aria_grabbed aria_expanded aria_haspopup aria_hidden
-      aria_invalid aria_label aria_labelledby aria_live aria_level aria_multiline aria_multiselectable
-      aria_orientation aria_pressed aria_readonly aria_required aria_selected aria_sort aria_valuemax
-      aria_valuemin aria_valuenow aria_valuetext aria_owns aria_relevant role data_toggle data_target 
-      aria_describedby onkeyup onkeydown onclick onchange/;
-
-    %HAS = (
-        (
-            map {
-                $_ => sub { undef }
-              } @ATTRIBUTES,
-            qw/parent data/
-        ),
-        (
-            map {
-                $_ => sub { [] }
-            } qw/children after_element before_element/
-        ),
-        tag            => sub { die "$_ is required" },
-        attribute_list => sub { \@ATTRIBUTES },
-        guid           => sub { Data::GUID->new->as_string },
+    my $class = MOP::Class->new(__PACKAGE__);
+    $class->add_method(
+        "make_magic",
+        sub {
+            my @magical = keys %{ $_[0] };
+            for my $attr (@magical) {
+                $class->add_slot( $attr, $_[0]->{$attr} );
+                $class->add_method(
+                    "has_${attr}",
+                    sub {
+                        my $val = $_[0]->{$attr};
+                        defined $val or return undef;
+                        is_arrayref($val) and return scalar @{$val};
+                        is_hashref($val) and return map { $_; }
+                          sort { $a <=> $b or $a cmp $b }
+                          keys %{$val};
+                        return 1;
+                    }
+                );
+                $class->add_method(
+                    "clear_${attr}",
+                    sub {
+                        undef $_[0]->{$attr};
+                    }
+                );
+                $class->add_method(
+                    $attr,
+                    sub {
+                        my $val = $_[0]->{$attr};
+                        defined $_[1] or return $val;
+                        is_arrayref($val) && not is_arrayref( $_[1] )
+                          and return push @{$val}, $_[1];
+                        is_hashref($val) && is_hashref( $_[1] )
+                          and return
+                          map { $_[0]->{$attr}->{$_} = $_[1]->{$_} }
+                          keys %{ $_[1] };
+                        $_[0]->{$attr} = $_[1] and return;
+                    }
+                );
+            }
+        }
     );
 
-    for my $attr ( @ATTRIBUTES,
-        qw/data tag attribute_list children after_element before_element guid parent/
-      )
-    {
-        no strict 'refs';
+    make_magic(
         {
-            *{"has_$attr"} = sub {
-                my $val = $_[0]->{$attr};
-                defined $val or return undef;
-                is_arrayref($val) and return scalar @{$val};
-                is_hashref($val) and return map { $_; }
-                  sort { $a <=> $b or $a cmp $b }
-                  keys %{$val};
-                return 1;
-              }
-        };
-        {
-            *{"clear_$attr"} = sub { undef $_[0]->{$attr} }
-        };
-        {
-            *{"$attr"} = sub {
-                my $val = $_[0]->{$attr};
-                defined $_[1] or return $val;
-                is_arrayref($val) && not is_arrayref( $_[1] )
-                  and return push @{$val}, $_[1];
-                is_hashref($val) && is_hashref( $_[1] )
-                  and return
-                  map { $_[0]->{$attr}->{$_} = $_[1]->{$_} } keys %{ $_[1] };
-                $_[0]->{$attr} = $_[1] and return;
-              }
-        };
-    }
+            (
+                map {
+                    $_ => sub { undef }
+                } qw/parent data/,
+            ),
+            (
+                map {
+                    $_ => sub { [] }
+                } qw/children after_element before_element/
+            ),
+            (
+                map {
+                    $_ => sub { die "$_ is required"; }
+                } qw/tag attribute_list/
+            ),
+            guid => sub { Data::GUID->new->as_string },
+        }
+    );
+}
+
+sub BUILDARGS {
+    my ( $self, $build_args ) = @_;
+
+    my $tag = $build_args->{tag}
+      or die "tag is required";
+
+    my $attribute_list = valid_attributes_for_tag( $build_args->{tag} );
+    $build_args->{attribute_list} = $attribute_list;
+
+    my %attributes = map {
+        my $attr = s/-/_/g;
+        defined $build_args->{$_}
+          ? ( $_ => sub { $build_args->{$_} } )
+          : ( $_ => sub { undef } )
+    } @{$attribute_list};
+    make_magic( \%attributes );
+
+    return $build_args;
 }
 
 sub build_element {
