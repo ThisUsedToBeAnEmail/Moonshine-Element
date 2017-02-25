@@ -61,8 +61,7 @@ BEGIN {
                 defined $val or return undef;
                 is_arrayref($val) and return scalar @{$val};
                 is_hashref($val) and return map { $_; }
-                  sort { $a <=> $b or $a cmp $b }
-                  keys %{$val};
+                  sort keys %{$val};
                 return 1;
               }
         };
@@ -76,22 +75,21 @@ BEGIN {
                 is_arrayref($val) && not is_arrayref( $_[1] )
                   and return push @{$val}, $_[1];
                 is_hashref($val) && is_hashref( $_[1] )
-                  and return
-                  map { $_[0]->{$attr}->{$_} = $_[1]->{$_} } keys %{ $_[1] };
-                $_[0]->{$attr} = $_[1] and return;
+                  and map { $_[0]->{$attr}->{$_} = $_[1]->{$_} } keys %{ $_[1] }
+                    and return 1;
+                $_[0]->{$attr} = $_[1] and return 1;
               }
         };
     }
 }
-
 
 sub build_element {
     my ( $self, $build_args, $parent ) = @_;
 
     $build_args->{parent} = $parent // $self;
     if ( is_blessed_ref($build_args) ) {
-        $build_args->isa('Moonshine::Element') and return $build_args
-          or die "I'm not a Moonshine::Element";
+        return $build_args if $build_args->isa('Moonshine::Element');
+        die "I'm not a Moonshine::Element";
     }
 
     return $self->new($build_args);
@@ -113,7 +111,8 @@ sub add_child {
     }
 
     my $child = $_[0]->build_element( $_[1] );
-    $_[0]->$action($child) and return $child;
+    $_[0]->$action($child);
+    return $child;
 }
 
 sub add_before_element {
@@ -189,7 +188,8 @@ sub _attribute_value {
             for ( @{ $_[0]->{$attribute} } ) {
                 $value and $value .= ' ';
                 is_scalarref( \$_ ) and $value .= $_ and next;
-                $value .= $self->build_element($_)->render and next;
+                $value .= $self->build_element($_)->render;
+                next;
             }
             return $value;
         }

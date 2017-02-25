@@ -76,6 +76,14 @@ moon_test({
             test => 'render',
             expected => '<div aria-valuemin="0">0</div>'
         },
+        {
+            catch => 1,
+            func => 'set',
+            args => [
+                'aria_valuemin', '0'  
+            ],
+            expected => 'args passed to set must be a hashref',
+        },
     ],
 });
 

@@ -127,6 +127,10 @@ $div_render = $hash_div->render;
 
 is($div_render, '<div class="for special people"></div>', "okay sort the hash and join the values");
 
+$hash_div->clear_class;
+$div_render = $hash_div->render;
+is($div_render, '<div></div>', "clear");
+
 done_testing();
                                                             
 1;

@@ -227,6 +227,109 @@ moon_test({
     ],
 });
 
-sunrise(40);
+moon_test({
+    name => 'test de basics',
+    build => {
+        class => 'Moonshine::Element',
+        args => {
+            tag => 'p',
+            data => ['hello'],
+            class => {
+                1 => 'a',
+                2 => 'b',
+                3 => 'c',
+            }
+        }
+    },
+    instructions => [
+        {
+            test => 'render',
+            expected => '<p class="a b c">hello</p>',
+        },
+        {
+            test => 'array',
+            func => 'has_class',
+            expected => [ 1, 2, 3 ],
+        },
+        {
+            test => 'undef',
+            func => 'clear_class',
+            expected => 'Moonshine::Element',
+        },
+        {
+            test => 'true',
+            func => 'class',
+            args => {
+                a => 1,
+                b => 2,
+                c => 3,
+            },         
+        },
+        {
+            test => 'render',
+            expected => '<p class="1 2 3">hello</p>',
+        },
+        {
+            test => 'true',
+            func => 'class',
+            args => {
+                a => 3,
+                c => 1,
+            },
+        },
+        {
+            test => 'render',
+            expected => '<p class="3 2 1">hello</p>',
+        },
+        {
+            test => 'true',
+            func => 'class',
+            args => [ qw/a b c/ ],
+        },
+        {
+            test => 'render',
+            expected => '<p class="a b c">hello</p>',
+        },
+    ]
+});
+
+my $child4 = Moonshine::Element->new({ tag => 'p', data => ['tester'] });
+
+moon_test(
+    name => 'ooo',
+    instance => $child1,
+    instructions => [
+        {
+            test => 'render',
+            expected => '<p>test</p>',
+        },
+        {
+            func => 'build_element',
+            args => [
+                $child4,
+            ],
+            args_list => 1,
+            test => 'obj',
+            expected => 'Moonshine::Element',
+            subtest => [
+                {
+                    test => 'render',
+                    expected => '<p>tester</p>',
+                }
+            ],
+        },
+        {
+            func => 'build_element',
+            catch => 1,
+            args => [
+                bless {}, 'NotOnTheMoon',
+            ],
+            args_list => 1,
+            expected => 'I\'m not a Moonshine::Element',
+        }
+    ]
+);
+
+sunrise(56);
 
 1;
