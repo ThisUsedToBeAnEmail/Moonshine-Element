@@ -198,6 +198,106 @@ moon_test(
     ],
 );
 
-sunrise(33);
+moon_test(
+    name  => 'chain name',
+    build => {
+        class => 'Moonshine::Element',
+        args  => {
+            tag           => 'div',
+            name          => 'three',
+            after_element => [
+                {
+                    tag      => 'div',
+                    name     => 'six',
+                    children => [
+                        {
+                            tag  => 'div',
+                            name => 'seven',
+                        }
+                    ]
+                }
+            ],
+            before_element => [
+                {
+                    tag      => 'div',
+                    name     => 'one',
+                    children => [
+                        {
+                            tag  => 'div',
+                            name => 'two',
+                        }
+                    ]
+                }
+            ],
+            children => [
+                {
+                    tag      => 'div',
+                    name     => 'four',
+                    children => [
+                        {
+                            tag  => 'div',
+                            name => 'five',
+                        }
+                    ]
+                }
+            ]
+
+        }
+    },
+    instructions => [
+        {
+            test => 'render',
+            expected =>
+'<div name="one"><div name="two"></div></div><div name="three"><div name="four"><div name="five"></div></div></div><div name="six"><div name="seven"></div></div>',
+        },
+        {
+            test     => 'obj',
+            func     => 'one',
+            expected => 'Moonshine::Element',
+            subtest  => [
+                {
+                    test => 'render',
+                    expected =>
+                      '<div name="one"><div name="two"></div></div>',
+                },
+                {
+                    test     => 'obj',
+                    func     => 'two',
+                    expected => 'Moonshine::Element',
+                    subtest  => [
+                        {
+                            test     => 'render',
+                            expected => '<div name="two"></div>',
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            test     => 'obj',
+            func     => 'five',
+            expected => 'Moonshine::Element',
+            subtest  => [
+                {
+                    test     => 'render',
+                    expected => '<div name="five"></div>',
+                }
+            ]
+        },
+        {
+            test     => 'obj',
+            func     => 'seven',
+            expected => 'Moonshine::Element',
+            subtest  => [
+                {
+                    test     => 'render',
+                    expected => '<div name="seven"></div>',
+                }
+            ]
+        }
+    ],
+);
+
+sunrise(47);
 
 1;

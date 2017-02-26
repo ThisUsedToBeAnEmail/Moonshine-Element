@@ -90,8 +90,7 @@ sub AUTOCAN {
 
     return if $meth =~ /BUILD|DEMOLISH/;
     my $element = $self->_look_for($meth);
-    return sub { $element }
-      if $element;
+    return sub { $element } if $element;
     die "AUTOCAN: ${meth} cannot be found";
 }
 
@@ -100,7 +99,8 @@ sub _look_for {
         for ( @{$_[0]->{$ele}} ) {
             $_->has_name and $_->name eq $_[1]
                 and return $_;
-            return $_->_look_for( $_[1] );
+            my $found = $_->_look_for( $_[1] );
+            return $found if $found;
         }
     }
     return undef;
