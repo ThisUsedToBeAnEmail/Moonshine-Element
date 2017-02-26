@@ -6,7 +6,7 @@ use Ref::Util qw/is_scalarref is_arrayref is_hashref is_blessed_ref/;
 use UNIVERSAL::Object;
 use Data::GUID;
 use Moonshine::Util qw/valid_attributes_for_tag/;
-use MOP::Class;
+use Autoload::AUTOCAN;
 
 our $VERSION = '0.08';
 
@@ -81,6 +81,28 @@ BEGIN {
               }
         };
     }
+}
+
+sub AUTOCAN {
+    my ($self, $method) = @_;
+
+    return if $method =~ /BUILD|DEMOLISH/;
+    use Data::Dumper;
+    warn Dumper $method;
+
+}
+
+sub BUILDARGS {
+    my ($self, $args) = @_;
+
+    for my $ele (qw/children before_element after_element/) {
+        if ( $args->{$ele} ) {
+            for ( 0 .. (scalar @{ $args->{$ele} } - 1) ) {
+                $args->{$ele}[$_] = $self->build_element($args->{$ele}[$_]);  
+            } 
+        }
+    }
+    return $args;
 }
 
 sub build_element {
