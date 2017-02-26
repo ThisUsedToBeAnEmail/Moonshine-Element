@@ -84,12 +84,26 @@ BEGIN {
 }
 
 sub AUTOCAN {
-    my ($self, $method) = @_;
+    my ($self, $meth) = @_;
 
-    return if $method =~ /BUILD|DEMOLISH/;
-    use Data::Dumper;
-    warn Dumper $method;
+    return if $meth =~ /BUILD|DEMOLISH/;
+    my $element = $self->look_for($meth);
+    return sub { $element } if $element;
+    die "AUTOCAN: ${meth} cannot be found";
+}
 
+sub look_for {
+    for my $ele (qw/children before_element after_elemnt/) {
+        if ( my $elements = $_[0]->{$ele} ) {
+            for ( @{ $elements } ) {
+               if ( $_->has_name and $_->name eq $_[1] ) {
+                  return $_;      
+               }
+               $_->look_for($_[1]); 
+            }
+        }
+    }
+    return undef;   
 }
 
 sub BUILDARGS {

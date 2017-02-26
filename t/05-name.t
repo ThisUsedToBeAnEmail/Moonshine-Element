@@ -31,9 +31,31 @@ moon_test(
             test => 'render',
             expected => '<div name="one"><div name="two"><div name="three"></div></div></div>',
         },
+        {
+            test => 'obj',
+            func => 'two',
+            expected => 'Moonshine::Element',
+            subtest => [
+                {
+                    test => 'render',
+                    expected => '<div name="two"><div name="three"></div></div>',
+                },
+                {
+                    test => 'obj',
+                    func => 'three',
+                    expected => 'Moonshine::Element',
+                    subtest => [
+                        {
+                            test => 'render',
+                            expected => '<div name="three"></div>',
+                        }
+                    ]
+                }
+            ]
+        }
     ],
 );
 
-sunrise(2);
+sunrise(8);
 
 1;
