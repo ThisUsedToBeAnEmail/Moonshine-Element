@@ -13,8 +13,10 @@ our $VERSION = '0.08';
 use feature qw/switch/;
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
-our @ISA; BEGIN { @ISA = ('UNIVERSAL::Object') }
+our @ISA;
+BEGIN { @ISA = ('UNIVERSAL::Object') }
 our %HAS;
+
 BEGIN {
     my @ATTRIBUTES =
       qw/accept accept_charset accesskey action align alt async autocomplete
@@ -30,7 +32,7 @@ BEGIN {
       aria_disabled aria_dropeffect aria_flowto aria_grabbed aria_expanded aria_haspopup aria_hidden
       aria_invalid aria_label aria_labelledby aria_live aria_level aria_multiline aria_multiselectable
       aria_orientation aria_pressed aria_readonly aria_required aria_selected aria_sort aria_valuemax
-      aria_valuemin aria_valuenow aria_valuetext aria_owns aria_relevant role data_toggle data_target 
+      aria_valuemin aria_valuenow aria_valuetext aria_owns aria_relevant role data_toggle data_target
       aria_describedby onkeyup onkeydown onclick onchange/;
 
     %HAS = (
@@ -76,7 +78,7 @@ BEGIN {
                   and return push @{$val}, $_[1];
                 is_hashref($val) && is_hashref( $_[1] )
                   and map { $_[0]->{$attr}->{$_} = $_[1]->{$_} } keys %{ $_[1] }
-                    and return 1;
+                  and return 1;
                 $_[0]->{$attr} = $_[1] and return 1;
               }
         };
@@ -84,36 +86,37 @@ BEGIN {
 }
 
 sub AUTOCAN {
-    my ($self, $meth) = @_;
+    my ( $self, $meth ) = @_;
 
     return if $meth =~ /BUILD|DEMOLISH/;
     my $element = $self->look_for($meth);
-    return sub { $element } if $element;
+    return sub { $element }
+      if $element;
     die "AUTOCAN: ${meth} cannot be found";
 }
 
 sub look_for {
     for my $ele (qw/children before_element after_elemnt/) {
         if ( my $elements = $_[0]->{$ele} ) {
-            for ( @{ $elements } ) {
-               if ( $_->has_name and $_->name eq $_[1] ) {
-                  return $_;      
-               }
-               $_->look_for($_[1]); 
+            for ( @{$elements} ) {
+                if ( $_->has_name and $_->name eq $_[1] ) {
+                    return $_;
+                }
+                $_->look_for( $_[1] );
             }
         }
     }
-    return undef;   
+    return undef;
 }
 
 sub BUILDARGS {
-    my ($self, $args) = @_;
+    my ( $self, $args ) = @_;
 
     for my $ele (qw/children before_element after_element/) {
         if ( $args->{$ele} ) {
-            for ( 0 .. (scalar @{ $args->{$ele} } - 1) ) {
-                $args->{$ele}[$_] = $self->build_element($args->{$ele}[$_]);  
-            } 
+            for ( 0 .. ( scalar @{ $args->{$ele} } - 1 ) ) {
+                $args->{$ele}[$_] = $self->build_element( $args->{$ele}[$_] );
+            }
         }
     }
     return $args;
@@ -168,14 +171,14 @@ sub render {
         if ( $_[0]->$has_action ) {
             $html_attributes .= sprintf( '%s="%s" ',
                 $html_attribute,
-                $_[0]->_attribute_value( $attribute, $has_action ) 
-            );
+                $_[0]->_attribute_value( $attribute, $has_action ) );
         }
     }
 
     my $tag            = $_[0]->tag;
     my $render_element = $_[0]->_render_element;
-    my $html           = sprintf '<%s %s>%s</%s>', $tag, $html_attributes, $render_element, $tag;
+    my $html           = sprintf '<%s %s>%s</%s>', $tag, $html_attributes,
+      $render_element, $tag;
 
     if ( $_[0]->has_before_element ) {
         for ( @{ $_[0]->before_element } ) {
