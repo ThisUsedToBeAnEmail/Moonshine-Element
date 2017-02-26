@@ -5,7 +5,6 @@ use warnings;
 use Ref::Util qw/is_scalarref is_arrayref is_hashref is_blessed_ref/;
 use UNIVERSAL::Object;
 use Data::GUID;
-use Moonshine::Util qw/valid_attributes_for_tag/;
 use Autoload::AUTOCAN;
 
 our $VERSION = '0.08';

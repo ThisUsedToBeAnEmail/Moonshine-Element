@@ -20,9 +20,10 @@ WriteMakefile(
         'Moonshine::Test' => 0.09,
     },
     PREREQ_PM => {
-        'UNIVERSAL::Object' => '0.04',
-        'Ref::Util' => '0.101',
+        'UNIVERSAL::Object' => '0.06',
+        'Ref::Util' => '0.113',
         'Data::GUID' => '0.048',
+        'Autoload::AUTOCAN' =>  '0.004',
         'feature' => 0,
         'strict' => 0,
         'warnings' => 0,
