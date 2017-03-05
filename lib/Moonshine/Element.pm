@@ -87,17 +87,22 @@ BEGIN {
 sub AUTOCAN {
     my ( $self, $meth ) = @_;
     return if $meth =~ /BUILD|DEMOLISH/;
-    my $element = $self->_look_for($meth);
+    my $element = $self->_look_for($meth, ['name']);
     return sub { $element } if $element;
     die "AUTOCAN: ${meth} cannot be found";
 }
 
 sub _look_for {
-    for my $ele (qw/children before_element after_element/) {
-        for ( @{$_[0]->{$ele}} ) {
-            $_->has_name and $_->name eq $_[1]
-                and return $_;
-            my $found = $_->_look_for( $_[1] );
+    for my $ele (qw/data children before_element after_element/) {
+        next unless is_arrayref($_[0]->{$ele});
+        for my $e ( @{$_[0]->{$ele}} ) {
+            next unless is_blessed_ref($e);
+            for ( @{ $_[2] } ) {
+                my $has = sprintf 'has_%s', $_;
+                $e->$has and $e->$_ =~ m/$_[1]/
+                    and return $e;
+            }
+            my $found = $e->_look_for( $_[1], $_[2] );
             return $found if $found;
         }
     }
@@ -108,12 +113,19 @@ sub BUILDARGS {
     my ( $self, $args ) = @_;
 
     for my $ele (qw/children before_element after_element/) {
-        if ( $args->{$ele} ) {
-            for ( 0 .. ( scalar @{ $args->{$ele} } - 1 ) ) {
-                $args->{$ele}[$_] = $self->build_element( $args->{$ele}[$_] );
-            }
+        next unless is_arrayref($args->{$ele});
+        for ( 0 .. ( scalar @{ $args->{$ele} } - 1 ) ) {
+            $args->{$ele}[$_] = $self->build_element( $args->{$ele}[$_] );
         }
     }
+    
+    if (is_arrayref($args->{data})) {
+        for ( 0 .. ( scalar @{ $args->{data} } - 1 ) ) {
+            next unless is_hashref($args->{data}[$_]) or is_blessed_ref($args->{data}[$_]);
+            $args->{data}[$_] = $self->build_element( $args->{data}[$_] );
+        }
+    }
+
     return $args;
 }
 
@@ -194,6 +206,21 @@ sub text {
     return $_[0]->has_data ? $_[0]->_attribute_value('data') : '';
 }
 
+sub set {
+    is_hashref( $_[1] ) or die "args passed to set must be a hashref";
+
+    for my $attribute ( keys %{ $_[1] } ) {
+        $_[0]->$attribute( $_[1]->{$attribute} );
+    }
+
+    return $_[0];
+}
+
+sub get_element_by_id {
+    is_scalarref(\$_[1]) or die "a misserable death";
+    return $_[0]->_look_for($_[1], ['id']);
+}
+
 sub _render_element {
     my $element = $_[0]->text;
     if ( $_[0]->has_children ) {
@@ -233,15 +260,6 @@ sub _attribute_value {
     }
 }
 
-sub set {
-    is_hashref( $_[1] ) or die "args passed to set must be a hashref";
-
-    for my $attribute ( keys %{ $_[1] } ) {
-        $_[0]->$attribute( $_[1]->{$attribute} );
-    }
-
-    return $_[0];
-}
 
 sub _tidy_html {
     $_[1] =~ s/\s+>/>/g;
