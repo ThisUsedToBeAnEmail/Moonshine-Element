@@ -79,5 +79,46 @@ moon_test(
     ]
 );
 
+moon_test(
+    name => 'get_element_by_id - before_element - - ' . questionable,
+    build => {
+        class => 'Moonshine::Element',
+        args => {
+            tag => 'div',
+            children => [
+                {
+                    tag => 'p',
+                    data => [ 'Locked', 'in', 'a', 'corridor' ],
+                }
+            ],
+            before_element => [
+                {
+                    tag => 'p',
+                    id => 'findme',
+                    data => [ 'Fifth', 'Floor' ],
+                }
+            ], 
+        }
+    },
+    instructions => [
+        {
+            test => 'render',
+            expected => '<p id="findme">Fifth Floor</p><div><p>Locked in a corridor</p></div>',
+        },
+        {
+            test => 'obj',
+            func => 'get_element_by_id',
+            args => ['findme'],
+            args_list => 1,
+            expected => 'Moonshine::Element',
+            subtest => [
+                {
+                    test => 'render',
+                    expected => '<p id="findme">Fifth Floor</p>',
+                }
+            ]
+        }
+    ]
+);
 
 sunrise();
