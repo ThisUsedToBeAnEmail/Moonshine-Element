@@ -155,9 +155,20 @@ moon_test(
                     expected => '<small id="findme">Who let you in</small>',
                 }
             ]
+        },
+        {
+            test => 'undef',
+            func => 'get_element_by_id',
+            args => ['nothere'],
+            args_list => 1,
+        },
+        {
+            catch => 1,
+            func => 'get_element_by_id',
+            args => ['nothere'],
+            expected => 'first param passed to get_element_by_id not a scalar.',
         }
     ]
 );
 
-
-sunrise();
+sunrise(22, zombie);

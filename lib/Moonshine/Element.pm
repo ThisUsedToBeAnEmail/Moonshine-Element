@@ -7,7 +7,7 @@ use UNIVERSAL::Object;
 use Data::GUID;
 use Autoload::AUTOCAN;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use feature qw/switch/;
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
@@ -217,7 +217,7 @@ sub set {
 }
 
 sub get_element_by_id {
-    is_scalarref(\$_[1]) or die "a misserable death";
+    is_scalarref(\$_[1]) or die "first param passed to get_element_by_id not a scalar";
     return $_[0]->_look_for($_[1], ['id']);
 }
 
@@ -260,7 +260,6 @@ sub _attribute_value {
     }
 }
 
-
 sub _tidy_html {
     $_[1] =~ s/\s+>/>/g;
     return $_[1];
@@ -276,7 +275,7 @@ Moonshine::Element - Build some more html.
 
 =head1 VERSION
 
-Version 0.08 
+Version 0.09 
 
 =head1 DESCRIPTION
 
@@ -383,6 +382,12 @@ is pushed in the after_element attribute.
             ....
         }
     );
+
+=head2 get_element_by_id
+
+Accepts an id and returns the element if found.
+
+    my $element = $base->get_element_by_id('find-me');
 
 =head2 render
 
