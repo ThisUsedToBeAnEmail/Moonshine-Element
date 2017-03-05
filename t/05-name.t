@@ -298,6 +298,6 @@ moon_test(
     ],
 );
 
-sunrise(47);
+sunrise(47, tripping_out);
 
 1;

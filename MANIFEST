@@ -8,6 +8,7 @@ t/01-basic.t
 t/02-building-html.t
 t/03-set.t
 t/04-data.t
+t/05-name.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t

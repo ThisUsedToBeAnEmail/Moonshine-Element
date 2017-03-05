@@ -87,6 +87,6 @@ moon_test({
     ],
 });
 
-sunrise();
+sunrise(11, sprintf " %s ", cute_bear);
 
 1;

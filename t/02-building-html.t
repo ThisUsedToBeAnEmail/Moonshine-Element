@@ -330,6 +330,6 @@ moon_test(
     ]
 );
 
-sunrise(56);
+sunrise(56, innocent . love);
 
 1;

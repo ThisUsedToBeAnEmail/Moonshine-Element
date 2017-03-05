@@ -86,7 +86,6 @@ BEGIN {
 
 sub AUTOCAN {
     my ( $self, $meth ) = @_;
-
     return if $meth =~ /BUILD|DEMOLISH/;
     my $element = $self->_look_for($meth);
     return sub { $element } if $element;

@@ -41,6 +41,6 @@ moon_test(
     ],
 );
 
-sunrise(4);
+sunrise(4, do_you_lift_bro);
 
 1;
