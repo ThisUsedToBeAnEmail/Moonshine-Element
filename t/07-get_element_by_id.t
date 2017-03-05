@@ -80,7 +80,7 @@ moon_test(
 );
 
 moon_test(
-    name => 'get_element_by_id - before_element - - ' . questionable,
+    name => 'get_element_by_id - before_element - - ' . pointing,
     build => {
         class => 'Moonshine::Element',
         args => {
@@ -120,5 +120,44 @@ moon_test(
         }
     ]
 );
+
+moon_test(
+    name => 'get_element_by_id - data - - ' . chasing,
+    build => {
+        class => 'Moonshine::Element',
+        args => {
+            tag => 'p',
+            data => [
+                'Bright',
+                {
+                    tag => 'small',
+                    id => 'findme',
+                    data => [ 'Who', 'let', 'you', 'in' ],
+                },
+                'White',
+            ],
+        }
+    },
+    instructions => [
+        {
+            test => 'render',
+            expected => '<p>Bright <small id="findme">Who let you in</small> White</p>',
+        },
+        {
+            test => 'obj',
+            func => 'get_element_by_id',
+            args => ['findme'],
+            args_list => 1,
+            expected => 'Moonshine::Element',
+            subtest => [
+                {
+                    test => 'render',
+                    expected => '<small id="findme">Who let you in</small>',
+                }
+            ]
+        }
+    ]
+);
+
 
 sunrise();
