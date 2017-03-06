@@ -7,7 +7,7 @@ use UNIVERSAL::Object;
 use Data::GUID;
 use Autoload::AUTOCAN;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 use feature qw/switch/;
 no if $] >= 5.017011, warnings => 'experimental::smartmatch';
@@ -307,7 +307,7 @@ Moonshine::Element - Build some more html.
 
 =head1 VERSION
 
-Version 0.09 
+Version 0.10 
 
 =head1 DESCRIPTION
 
@@ -417,41 +417,41 @@ is pushed in the after_element attribute.
 
 =head2 get_element
 
-Will always return the first element it finds.
+Will always return the first element if one is found.
 
     $self->get_element('find-me', ['id', 'name']);
 
 =head2 get_element_by_id
 
-Accepts an id and returns the element if found.
+Accepts a id and returns a element or undef.
 
     my $element = $base->get_element_by_id('find-me');
 
 =head2 get_element_by_name
 
-Accepts a name and returns the element if found.
+Accepts a name and returns a element or undef.
 
     my $element = $base->get_element_by_name('findme');
 
-Autoload lets you write that ^^ as,
+or..
 
     $element->findme
 
 =head2 get_elements
 
-Returns an ArrayRef of Elements.
+Returns ArrayRef of Elements.
 
     $self->get_elements('found', ['class']);
 
 =head2 get_element_by_class
 
-Accepts a Scalar and return an ArrayRef of Elements.
+Accepts a Scalar returns ArrayRef of Elements.
 
     $self->get_elements_by_class('found');
 
 =head2 get_elements_by_tag
 
-Accepts a Scalar and returns an ArrayRef of Elements.
+Accepts a Scalar returns ArrayRef of Elements.
 
     $self->get_elements_by_tag('table');
 
@@ -460,9 +460,6 @@ Accepts a Scalar and returns an ArrayRef of Elements.
 Render the Element as html.
 
     $base->render;
-
-All attributes set on an 'Element' will be rendered. There is currently no Attribute to Element
-validation.
 
 Html attributes can be HashRef's (keys sorted and values joined), ArrayRef's(joined), or just Scalars.
 

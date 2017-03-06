@@ -17,7 +17,7 @@ WriteMakefile(
     },
     BUILD_REQUIRES => {
         'Test::More' => 0,
-        'Moonshine::Test' => 0.11,
+        'Moonshine::Test' => 0.13,
     },
     PREREQ_PM => {
         'UNIVERSAL::Object' => '0.06',

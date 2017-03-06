@@ -82,7 +82,7 @@ my $element_comp = Moonshine::Element->new(
 );
 
 moon_test(
-    name => 'get_element_by_id - before - children - after ' . kirby,
+    name => 'get_element_by_id - before - children - after ',
     instance => $element_comp,
     instructions => [
         {
