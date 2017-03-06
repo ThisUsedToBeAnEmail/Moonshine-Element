@@ -93,13 +93,13 @@ sub AUTOCAN {
 }
 
 sub _look_for {
-    for my $ele (qw/data children before_element after_element/) {
+    for my $ele (qw/before_element data children after_element/) {
         next unless is_arrayref($_[0]->{$ele});
         for my $e ( @{$_[0]->{$ele}} ) {
             next unless is_blessed_ref($e);
             for ( @{ $_[2] } ) {
                 my $has = sprintf 'has_%s', $_;
-                $e->$has and $e->$_ =~ m/$_[1]/
+                $e->$has and $e->_attribute_value($_, $has) =~ m/$_[1]/
                     and return $e;
             }
             my $found = $e->_look_for( $_[1], $_[2] );
@@ -223,13 +223,13 @@ sub get_element_by_id {
 
 sub get_elements {
     $_[3] //= [];
-    for my $ele (qw/data children before_element after_element/) {
+    for my $ele (qw/before_element data children after_element/) {
         next unless is_arrayref($_[0]->{$ele});
         for my $e ( @{$_[0]->{$ele}} ) {
             next unless is_blessed_ref($e);
             for ( @{ $_[2] } ) {
                 my $has = sprintf 'has_%s', $_;
-                $e->$has and $e->$_ =~ m/$_[1]/
+                $e->$has and $e->_attribute_value($_, $has) =~ m/$_[1]/
                     and push @{ $_[3] }, $e;
             }
             $e->get_elements( $_[1], $_[2], $_[3] );
