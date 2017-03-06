@@ -82,22 +82,51 @@ my $element_comp = Moonshine::Element->new(
 );
 
 moon_test(
-    name => 'get_element_by_id - first child - easy - ' . kirby,
+    name => 'get_element_by_id - before - children - after ' . kirby,
     instance => $element_comp,
     instructions => [
         {
             test => 'render',
             expected => '<p id="hiding">One Two<span class="okay found">Hey You</span></p><div><p class="found" id="findme">Catch Me</p></div><p id="hiding">One Two<span class="found">If You Can</span></p>',
         },
-
         {
             test => 'count_ref',
-            index => 0,
             func => 'get_elements',
             args => [ 'found', ['class'] ],
             args_list => 1,
             expected => 3,
-        }
+        },
+        {
+            test => 'count_ref',
+            func => 'get_elements_by_class',
+            args => [ 'found' ],
+            args_list => 1,
+            expected => 3,
+        },
+        {
+            test => 'count_ref',
+            func => 'get_elements_by_class',
+            args => [ 'okay found' ],
+            args_list => 1,
+            expected => 1,
+        },
+        {
+            catch => 1,
+            func => 'get_elements_by_class',
+            expected => qr/first param passed to get_elements_by_class not a scalar/,
+        },
+        {
+            test => 'count_ref',
+            func => 'get_elements_by_tag',
+            args => [ 'span' ],
+            args_list => 1,
+            expected => 2,
+        },
+        {
+            catch => 1,
+            func => 'get_elements_by_tag',
+            expected => qr/first param passed to get_elements_by_tag not a scalar/,
+        },
     ]
 );
 
@@ -107,20 +136,22 @@ render_me(
     expected => '<p class="found" id="findme">Catch Me</p>',
 );
 
-my $found = $element_comp->get_elements('found', ['class']);
-render_me(
-    instance => $found->[0],
-    expected => '<span class="okay found">Hey You</span>',
-);
+my $found_get_elements = $element_comp->get_elements('found', ['class']);
+my $found_get_elements_by_class = $element_comp->get_elements_by_class('found');
 
-render_me(
-    instance => $found->[1],
-    expected => '<p class="found" id="findme">Catch Me</p>',
-);
+for my $found ( ($found_get_elements, $found_get_elements_by_class ) ) {
+    render_me(
+        instance => $found->[0],
+        expected => '<span class="okay found">Hey You</span>',
+    );
+    render_me(
+        instance => $found->[1],
+        expected => '<p class="found" id="findme">Catch Me</p>',
+    );
+    render_me(
+        instance => $found->[2],
+        expected => '<span class="found">If You Can</span>',
+    );
+}
 
-render_me(
-    instance => $found->[2],
-    expected => '<span class="found">If You Can</span>',
-);
-
-sunrise();
+sunrise(19, strut);

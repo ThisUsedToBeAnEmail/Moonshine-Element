@@ -87,26 +87,9 @@ BEGIN {
 sub AUTOCAN {
     my ( $self, $meth ) = @_;
     return if $meth =~ /BUILD|DEMOLISH/;
-    my $element = $self->_look_for($meth, ['name']);
+    my $element = $self->get_element($meth, ['name']);
     return sub { $element } if $element;
     die "AUTOCAN: ${meth} cannot be found";
-}
-
-sub _look_for {
-    for my $ele (qw/before_element data children after_element/) {
-        next unless is_arrayref($_[0]->{$ele});
-        for my $e ( @{$_[0]->{$ele}} ) {
-            next unless is_blessed_ref($e);
-            for ( @{ $_[2] } ) {
-                my $has = sprintf 'has_%s', $_;
-                $e->$has and $e->_attribute_value($_, $has) =~ m/$_[1]/
-                    and return $e;
-            }
-            my $found = $e->_look_for( $_[1], $_[2] );
-            return $found if $found;
-        }
-    }
-    return undef;
 }
 
 sub BUILDARGS {
@@ -216,9 +199,31 @@ sub set {
     return $_[0];
 }
 
+sub get_element {
+    for my $ele (qw/before_element data children after_element/) {
+        next unless is_arrayref($_[0]->{$ele});
+        for my $e ( @{$_[0]->{$ele}} ) {
+            next unless is_blessed_ref($e);
+            for ( @{ $_[2] } ) {
+                my $has = sprintf 'has_%s', $_;
+                $e->$has and $e->_attribute_value($_, $has) =~ m/$_[1]/
+                    and return $e;
+            }
+            my $found = $e->get_element( $_[1], $_[2] );
+            return $found if $found;
+        }
+    }
+    return undef;
+}
+
 sub get_element_by_id {
     is_scalarref(\$_[1]) or die "first param passed to get_element_by_id not a scalar";
-    return $_[0]->_look_for($_[1], ['id']);
+    return $_[0]->get_element($_[1], ['id']);
+}
+
+sub get_element_by_name {
+    is_scalarref(\$_[1]) or die "first param passed to get_element_by_name not a scalar";
+    return $_[0]->get_element($_[1], ['name']);
 }
 
 sub get_elements {
@@ -236,6 +241,16 @@ sub get_elements {
         }
     }
     return $_[3];
+}
+
+sub get_elements_by_class {
+    is_scalarref(\$_[1]) or die "first param passed to get_elements_by_class not a scalar";
+    return $_[0]->get_elements($_[1], ['class']);
+}
+
+sub get_elements_by_tag {
+    is_scalarref(\$_[1]) or die "first param passed to get_elements_by_tag not a scalar";
+    return $_[0]->get_elements($_[1], ['tag']);
 }
 
 sub _render_element {
@@ -400,11 +415,45 @@ is pushed in the after_element attribute.
         }
     );
 
+=head2 get_element
+
+Will always return the first element it finds.
+
+    $self->get_element('find-me', ['id', 'name']);
+
 =head2 get_element_by_id
 
 Accepts an id and returns the element if found.
 
     my $element = $base->get_element_by_id('find-me');
+
+=head2 get_element_by_name
+
+Accepts a name and returns the element if found.
+
+    my $element = $base->get_element_by_name('findme');
+
+Autoload lets you write that ^^ as,
+
+    $element->findme
+
+=head2 get_elements
+
+Returns an ArrayRef of Elements.
+
+    $self->get_elements('found', ['class']);
+
+=head2 get_element_by_class
+
+Accepts a Scalar and return an ArrayRef of Elements.
+
+    $self->get_elements_by_class('found');
+
+=head2 get_elements_by_tag
+
+Accepts a Scalar and returns an ArrayRef of Elements.
+
+    $self->get_elements_by_tag('table');
 
 =head2 render
 
