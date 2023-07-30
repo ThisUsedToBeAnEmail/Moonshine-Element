@@ -5,7 +5,7 @@ use Test::More;
 use feature qw/say/;
 
 BEGIN {
-    use_ok('UNIVERSAL::Object', 'patch_parent');
+    use_ok('UNIVERSAL::Object');
     use_ok('Moonshine::Element');
 }
                                                        
